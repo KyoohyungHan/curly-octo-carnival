@@ -6,9 +6,6 @@ import sys
 import asyncio
 import json
 
-from dotenv import load_dotenv
-load_dotenv() # .env 파일을 찾아서 환경 변수로 불러옵니다.
-
 # ==========================================
 # 🚨 인코딩 설정 (한글 깨짐 방지)
 # ==========================================
