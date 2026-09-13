@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, BackgroundTasks
+from fastapi.responses import HTMLResponse
 from crewai import Agent, Task, Crew, Process
 import requests
 import os
@@ -164,7 +165,7 @@ def run_crew_background(user_id: str, utterance: str, callback_url: str, is_feed
             send_to_kakao(callback_url, f"❌ 에러가 발생했습니다:\n{str(e)}")
 
     asyncio.run(_async_task())
-
+    
 # ==========================================
 # 🚀 API 엔드포인트
 # ==========================================
@@ -210,3 +211,18 @@ async def kakao_chat(request: Request, background_tasks: BackgroundTasks):
             "outputs": [{"simpleText": {"text": response_text}}]
         }
     }
+
+@app.get("/wakeup", response_class=HTMLResponse)
+async def wakeup_server():
+    """서버 깨우기 전용 웹페이지"""
+    return """
+    <html>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <body style="display:flex; justify-content:center; align-items:center; height:100vh; background-color:#fef01b; margin:0; font-family:sans-serif; text-align:center;">
+            <div style="background:white; padding:30px; border-radius:15px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                <h2 style="color:#333;">🟢 챗봇 서버 기동 완료!</h2>
+                <p style="color:#666; line-height:1.6;">서버가 성공적으로 깨어났습니다.<br>이제 우측 상단의 <b>[ X ]</b>를 눌러 창을 닫고,<br>카톡방에서 <b>'대본 생성'</b>을 눌러주세요!</p>
+            </div>
+        </body>
+    </html>
+    """
