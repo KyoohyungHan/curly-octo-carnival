@@ -167,13 +167,27 @@ def run_crew_background(user_id: str, utterance: str, callback_url: str, is_feed
     asyncio.run(_async_task())
     
 # ==========================================
-# 🚀 API 엔드포인트
+# 🚀 API 엔드포인트 (보안 기능 추가)
 # ==========================================
 @app.post("/api/chat")
-async def kakao_chat(request: Request, background_tasks: BackgroundTasks):
-    payload = await request.json()
+async def kakao_chat(
+    request: Request, 
+    background_tasks: BackgroundTasks,
+    # 👇 헤더(x-kakao-bot-token) 검사 변수 추가
+    x_kakao_bot_token: str = Header(None) 
+):
+    # 🚨 1. 문지기 보안 검사 (무단 접근 차단)
+    # 서버에 저장된 내 비밀번호 가져오기
+    saved_token = os.environ.get("KAKAO_BOT_TOKEN")
     
-    # 1. 카카오 사용자 ID 식별
+    if saved_token: # 서버에 비밀번호가 세팅되어 있을 때만 검사
+        if x_kakao_bot_token != saved_token:
+            # 비밀번호가 틀리거나 아예 안 보냈다면 401 Unauthorized 에러를 던지며 접근 거부!
+            print(f"🚨 [보안 경고] 비정상적인 접근 시도 차단됨 (입력된 토큰: {x_kakao_bot_token})")
+            raise HTTPException(status_code=401, detail="Unauthorized Request")
+
+    # 👇 검문소를 통과한 정상적인 카카오톡 요청만 아래 로직 실행
+    payload = await request.json()
     user_id = payload.get("userRequest", {}).get("user", {}).get("id", "unknown")
     utterance = payload.get("userRequest", {}).get("utterance", "").strip()
     callback_url = payload.get("userRequest", {}).get("callbackUrl")
