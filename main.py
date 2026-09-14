@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, BackgroundTasks
+from fastapi import FastAPI, Request, BackgroundTasks, Header, HTTPException
 from fastapi.responses import HTMLResponse
 from crewai import Agent, Task, Crew, Process
 import requests
